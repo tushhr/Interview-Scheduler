@@ -4,38 +4,44 @@
 {% block content %}
 
 <div class="flex flex-col ">
-    {% for interview in interviews %}
-    <div class="flex flex-col mx-44 my-8 grid-rows-4 block p-6 bg-white rounded-lg border border-gray-200 shadow-md hover:bg-slate-50">
-        <div class="flex flex-row justify-between my-1">
-            <h2 class="mb-2 text-2xl font-bold text-gray-900">{{ interview.interview_name }}</h2>
-            <a href="{% url 'scheduler:interview_page' interview.id %}" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Edit</a>
-        </div>
-    
-        <div class="flex flex-row font-normal text-gray-800 my-1">
-            <p class="mx-4 ml-0">{{ interview.start_time }}</p>
-            <p class="mx-4">-</p>
-            <p class="mx-4">{{ interview.end_time }}</p>
-        </div>
-        
-        
-        <div class="my-8">
-            <p class="">Participants</p>
-            <hr width="12%" style="height:4px; background-color:#1d4ed8;">
-            
-            <div class="flex flex-row flex-wrap mt-4">
-                {% for user in interview.participant.all %}
-                <div>
-                    <button type="button" class="text-gray-900 bg-slate-50 bg-white border border-gray-300 hover:bg-gray-100 font-medium rounded-lg text-sm px-12 py-2.5 mr-6 mb-4">
-                        <p>{{ user.first_name }} {{ user.last_name }}</p>
-                        <p>{{ user.email }}</p>
-                    </button>
-                </div>
-                {% endfor %}
+    {% if interviews %}
+        {% for interview in interviews %}
+        <div class="flex flex-col mx-44 my-8 grid-rows-4 block p-6 bg-white rounded-lg border border-gray-200 shadow-md hover:bg-slate-50">
+            <div class="flex flex-row justify-between my-1">
+                <h2 class="mb-2 text-2xl font-bold text-gray-900">{{ interview.interview_name }}</h2>
+                <a href="{% url 'scheduler:interview_page' interview.id %}" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Edit</a>
             </div>
-        </div>
-        </div>
         
+            <div class="flex flex-row font-normal text-gray-800 my-1">
+                <p class="mx-4 ml-0">{{ interview.start_time }}</p>
+                <p class="mx-4">-</p>
+                <p class="mx-4">{{ interview.end_time }}</p>
+            </div>
+            
+            
+            <div class="my-8">
+                <p class="">Participants</p>
+                <hr width="12%" style="height:4px; background-color:#1d4ed8;">
+                
+                <div class="flex flex-row flex-wrap mt-4">
+                    {% for user in interview.participant.all %}
+                    <div>
+                        <button type="button" class="text-gray-900 bg-slate-50 bg-white border border-gray-300 hover:bg-gray-100 font-medium rounded-lg text-sm px-12 py-2.5 mr-6 mb-4">
+                            <p>{{ user.first_name }} {{ user.last_name }}</p>
+                            <p>{{ user.email }}</p>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            </div>
+            
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="flex flex-col mx-44 my-8 grid-rows-4 block p-6 bg-white rounded-lg border border-gray-200 shadow-md hover:bg-slate-50">
+        <p>No Interview Scheduled.</p>
     </div>
-    {% endfor %}
+    {% endif %}
 </div>
 {% endblock %}
