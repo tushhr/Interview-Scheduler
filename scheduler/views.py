@@ -13,9 +13,7 @@ from .models import interview
 
 # Create your views here.
 
-##REMOVE PRINTS THREAD 5.0
-#Clearing Error messages THREAD 6.1
-
+#Function to check availability of all the participants
 def check_availability(participants, start_time, end_time):
     #Set of tuples of start time, end time of all the interviews
     ##NAMING CONVENTION !!! THREAD 1.4.3
@@ -27,12 +25,19 @@ def check_availability(participants, start_time, end_time):
     
     return False
 
-def convert_datetime(start_time, end_time):
+#Function to convert datetime into django friendly type
+def convert_datetime_to_django(time):
     timezone = pytz.timezone("UTC")
-    start_time = timezone.localize(datetime.strptime(start_time, '%Y-%m-%dT%H:%M'))
-    end_time = timezone.localize(datetime.strptime(end_time, '%Y-%m-%dT%H:%M'))
+    time = timezone.localize(datetime.strptime(time, '%Y-%m-%dT%H:%M'))
 
-    return (start_time, end_time)
+    return time
+
+#Function to conver datetime into HTML form
+def convert_datetime_to_html(time):
+    time = str(time)
+    time = time[:10] + "T" +  time[11:-6]
+
+    return time
 
 def index(request):
     return render(request, 'scheduler/index.html')
@@ -49,8 +54,9 @@ def schedule_interview(request):
         start_time = request.POST['start_time']
         end_time = request.POST['end_time']
 
-        #Converting input datetime field into django friendly type
-        start_time, end_time = convert_datetime(start_time, end_time)
+        #Input datetime field into django friendly
+        start_time = convert_datetime_to_django(start_time)
+        end_time = convert_datetime_to_django(end_time)
 
         #Checks
         #Validating email
@@ -63,8 +69,6 @@ def schedule_interview(request):
                 
         except ObjectDoesNotExist:
             messages.error(request, "Oops! One or more invalid Email ID. Please try again")
-            print("Woops! Invalid Email ID. Please try again.")
-            print("Error")
             return redirect('/')
                 
         
@@ -79,8 +83,6 @@ def schedule_interview(request):
         
         if check_availability(participant_interviews, start_time, end_time):
             messages.error(request, "One or more participants will be busy during the selected time period. Please try a different time period.")
-            print("Availability issues")
-            print("Error")
             return redirect('/')
 
         #Add to Database
@@ -116,11 +118,8 @@ def timeline(request):
 def interview_page(request, interview_id):
     interviews = interview.objects.get(id = interview_id)
 
-    #THREAD 4.0
-    #Converting Python datetime into HTML
-    interviews.start_time, interviews.end_time = str(interviews.start_time), str(interviews.end_time)
-    interviews.start_time = interviews.start_time[:10] + "T" + interviews.start_time[11:-6]
-    interviews.end_time = interviews.end_time[:10] + "T" + interviews.end_time[11:-6]
+    interviews.start_time = convert_datetime_to_html(interviews.start_time)
+    interviews.end_time = convert_datetime_to_html(interviews.end_time)
 
     context = {
         'interview': interviews
@@ -140,7 +139,8 @@ def edit_interview(request):
         end_time = request.POST['end_time']
 
         #Converting input datetime field into django friendly type
-        start_time, end_time = convert_datetime(start_time, end_time)
+        start_time = convert_datetime_to_django(start_time)
+        end_time = convert_datetime_to_django(end_time)
         
         #Checks
         #Validating email
@@ -153,8 +153,6 @@ def edit_interview(request):
                 
         except ObjectDoesNotExist:
             messages.error(request, "Oops! One or more invalid Email ID. Please try again")
-            print("Woops! Invalid Email ID. Please try again.")
-            print("Error")
             return redirect('/timeline')
                 
         
@@ -198,19 +196,3 @@ def edit_interview(request):
         return redirect('/timeline')
 
     return redirect('/timeline')
-
-
-
-        ##Two way -- Show the USER which has confliciting schedule as well THREAD 1.4
-        ##Or just show a general error. T
-        ##Going with second flow right now
-            ##Throw some error message and return. THREAD 1.0.1
-
-        ##Update with "__in" THREAD 1.4.2
-            ##Throw some error message and return. THREAD 1.4.1#
-            # Extra Feauture
-        #Send common time period of all person THRAD 101
-
-
-        ##Update with "__in" THREAD 1.4.2
-        # #Valid Number of participants THREAD 1.1
