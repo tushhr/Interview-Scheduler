@@ -1,6 +1,8 @@
 from django.shortcuts import redirect, render
 from django.contrib import messages 
 from django.core.exceptions import ObjectDoesNotExist
+from django.conf import settings
+from django.core.mail import send_mail
 
 from datetime import date, datetime
 import pytz
@@ -90,6 +92,13 @@ def schedule_interview(request):
 
         
         messages.success(request, "Interview Scheduled successfully")
+        
+        send_mail(
+            subject = "Interview Scheduled",
+            message = "Your interview is scheduled.",
+            from_email = settings.EMAIL_HOST_USER,
+            recipient_list = participants_email
+        )
 
         return redirect('/')
 
@@ -178,6 +187,14 @@ def edit_interview(request):
         meet.save()
 
         messages.success(request, "Interview edited successfully")
+        
+        send_mail(
+            subject = "Your scheduled interview has an update!",
+            message = "Your interview is updated.",
+            from_email = settings.EMAIL_HOST_USER,
+            recipient_list = participants_email
+        )
+
         return redirect('/timeline')
 
     return redirect('/timeline')
