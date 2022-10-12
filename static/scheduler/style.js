@@ -50,7 +50,7 @@ function addParticipant(){
     //
     let newSpan = document.createElement("span")
     newSpan.textContent = "X"
-    newSpan.setAttribute("class", "cursor-default bg-gray-200 inline-flex items-center px-3 text-sm text-gray-900 rounded-r-lg border border-l-0 border-gray-300")
+    newSpan.setAttribute("class", "cursor-pointer bg-gray-200 inline-flex items-center px-3 text-sm text-gray-900 rounded-r-lg border border-l-0 border-gray-300")
     newSpan.setAttribute("id", tmpClassName)
     newSpan.setAttribute("onclick", "removeParent(this)")
 

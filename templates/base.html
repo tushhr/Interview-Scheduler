@@ -9,9 +9,7 @@
     
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- Manual CSS and JS
-    <link rel="stylesheet" type="text/css" href="{% static 'base.css' %}">-->
-
+    <!-- Manual CSS and JS-->
     <script src="{% static 'base.js' %}" type="text/javascript" defer></script> 
     <title>{% block title %} Interview Scheduler {% endblock %} </title>
     
@@ -38,7 +36,7 @@
     {% for message in messages  %}            
     <div class="{{ message.tags }} message{{ forloop.counter }} my-6 mx-48 rounded-lg px-10 py-3 flex justify-between" role="alert">
         <p><strong>Message : </strong> {{ message }}</p>
-        <span onclick="removeParent(this)" id="message{{ forloop.counter }}" class="cursor-default font-bold">x</span>
+        <span onclick="removeParent(this)" id="message{{ forloop.counter }}" class="cursor-pointer font-bold">x</span>
     </div>
     {% endfor %}
 
