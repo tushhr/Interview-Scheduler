@@ -108,9 +108,11 @@ def schedule_interview(request):
 
 def timeline(request):
     interviews = interview.objects.filter(end_time__date__gt = date.today())
-
+    
+    no_interviews = len(interviews)
     context ={
-        'interviews': interviews
+        'interviews': interviews,
+        'no_interviews': no_interviews
     }
 
     return render(request, 'scheduler/timeline.html', context)
@@ -128,71 +130,81 @@ def interview_page(request, interview_id):
 
 def edit_interview(request):
     if request.method == "POST":
-        # Needs to be update THREAD 2.0
-        interview_id = request.POST['interview_id']
-        edit_interview = request.POST['meet_name']
+        if 'edit_interview' in request.POST:
+            # Needs to be update THREAD 2.0
+            interview_id = request.POST['interview_id']
 
-        #Make it generic THREAD 2.1
-        participants_email = request.POST.getlist('email')
+            edit_interview = request.POST['meet_name']
 
-        start_time = request.POST['start_time']
-        end_time = request.POST['end_time']
+            #Make it generic THREAD 2.1
+            participants_email = request.POST.getlist('email')
 
-        #Converting input datetime field into django friendly type
-        start_time = convert_datetime_to_django(start_time)
-        end_time = convert_datetime_to_django(end_time)
-        
-        #Checks
-        #Validating email
-        try:
-            participants = set()
+            start_time = request.POST['start_time']
+            end_time = request.POST['end_time']
 
-            for email in participants_email:
-                participant = User.objects.get(email = email)
-                participants.add(participant)
-                
-        except ObjectDoesNotExist:
-            messages.error(request, "Oops! One or more invalid Email ID. Please try again")
+            #Converting input datetime field into django friendly type
+            start_time = convert_datetime_to_django(start_time)
+            end_time = convert_datetime_to_django(end_time)
+            
+            #Checks
+            #Validating email
+            try:
+                participants = set()
+
+                for email in participants_email:
+                    participant = User.objects.get(email = email)
+                    participants.add(participant)
+                    
+            except ObjectDoesNotExist:
+                messages.error(request, "Oops! One or more invalid Email ID. Please try again")
+                return redirect('/timeline')
+                    
+            
+            #Check for the number of participants
+            if len(participants) < 2:
+                messages.error(request, "Please selecte more than 2 distinct participants.")
+                return redirect('/timeline')
+
+            #Check the Availability of participants
+            #All the Interview id of the participants
+            participant_interviews = set(User.objects.filter(email__in = participants_email).values_list('interview', flat=True))
+            
+            #Remove the Interview user is editing
+            participant_interviews.remove(int(interview_id))
+            
+            if check_availability(participant_interviews, start_time, end_time):
+                messages.error(request, "One or more participants will be busy during the selected time period. Please try a different time period.")
+                return redirect('/timeline')
+
+            #Adding to Database
+            meet = interview.objects.get(id = interview_id)
+            meet.interview_name = edit_interview
+            meet.start_time = start_time
+            meet.end_time = end_time
+
+            meet.participant.clear()
+            for participant in participants:
+                meet.participant.add(participant)
+            
+            meet.save()
+
+            messages.success(request, "Interview edited successfully")
+            
+            send_mail(
+                subject = "Your scheduled interview has an update!",
+                message = "Your interview is updated.",
+                from_email = settings.EMAIL_HOST_USER,
+                recipient_list = participants_email
+            )
+
             return redirect('/timeline')
-                
-        
-        #Check for the number of participants
-        if len(participants) < 2:
-            messages.error(request, "Please selecte more than 2 distinct participants.")
+
+        elif 'delete_interview' in request.POST:
+            interview_id = request.POST['interview_id']
+            meet = interview.objects.get(id = interview_id)
+            meet.delete()
+    
             return redirect('/timeline')
 
-        #Check the Availability of participants
-        #All the Interview id of the participants
-        participant_interviews = set(User.objects.filter(email__in = participants_email).values_list('interview', flat=True))
-        
-        #Remove the Interview user is editing
-        participant_interviews.remove(int(interview_id))
-        
-        if check_availability(participant_interviews, start_time, end_time):
-            messages.error(request, "One or more participants will be busy during the selected time period. Please try a different time period.")
-            return redirect('/timeline')
-
-        #Adding to Database
-        meet = interview.objects.get(id = interview_id)
-        meet.interview_name = edit_interview
-        meet.start_time = start_time
-        meet.end_time = end_time
-
-        meet.participant.clear()
-        for participant in participants:
-            meet.participant.add(participant)
-        
-        meet.save()
-
-        messages.success(request, "Interview edited successfully")
-        
-        send_mail(
-            subject = "Your scheduled interview has an update!",
-            message = "Your interview is updated.",
-            from_email = settings.EMAIL_HOST_USER,
-            recipient_list = participants_email
-        )
-
-        return redirect('/timeline')
 
     return redirect('/timeline')
