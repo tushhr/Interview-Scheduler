@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Interview Scheduler {% endblock %}
+
+{% block script %}
+<script src="{% static 'scheduler/style.js' %}" type="text/javascript" defer></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="mx-64 my-8">
+    <form action="/schedule" method="POST" onsubmit="handleDateValidation(event)">
+        {% csrf_token %}
+
+        <!-- Change Placeholder -->
+        <div class="my-6">
+            <label for="meet_name" class="block text-base mb-2">Meeting Name</label>
+            <input type="text" name="meet_name" placeholder="Meet Name" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>
+        </div>
+
+        <div id="container" class="grid grid-cols-2 gap-6 my-6">
+            <div>
+                <label for="email1" class="block text-base mb-2">Participant 1</label>
+                <input type="email" name="email" placeholder="Mail Address" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>    
+            </div>
+            
+            <div>
+                <label for="email1" class="block text-base mb-2">Participant 2</label>
+                <input type="email" name="email" placeholder="Mail Address" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>
+            </div>
+        </div>
+        
+        <a onClick="addParticipant()" class="cursor-default text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 my-3 text-center">Add participant</a>
+
+        <div class="grid grid-cols-2 gap-6 my-6">
+            <div>
+                <label for="email1" class="block text-base mb-2">Start Time</label>
+                <input type="datetime-local" name="start_time" id="startTime" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>    
+            </div>
+            
+            <div>
+                <label for="email1" class="block text-base mb-2">End Time</label>
+                <input type="datetime-local" name="end_time" id="endTime" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>
+                <p id="error" class="text-red-500 text-sm font-medium"></p>
+            </div>
+        </div>
+        
+        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 my-3 text-center">Schedule</button>
+    </form>
+</div>
+{% endblock %}

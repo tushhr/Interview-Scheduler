@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block title %} Interview {% endblock %}
+
+{% block script %}
+<script src="{% static 'scheduler/style.js' %}" type="text/javascript" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="mx-64 my-8">
+    <form action="/edit" method="POST" onsubmit="handleDateValidation(event)">
+        {% csrf_token %}
+
+        <!-- Change Placeholder -->
+        <div class="my-6">
+            <label for="meet_name" class="block text-base mb-2">Meeting Name</label>
+            <input type="text" name="meet_name" placeholder="Meet Name" value="{{ interview.interview_name }}" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>
+        </div>
+
+        <div id="container" class="grid grid-cols-2 gap-6 my-6">
+            {% for user in interview.participant.all %}
+            <div class="participant{{ forloop.counter }}">
+                <label for="email" class="block text-base mb-2">Participant Mail</label>
+                <div class="flex">
+                    <input type="email" name="email" placeholder="Please Enter Mail" value="{{ user.email }}" class="flex-1 bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-l-lg focus:border-blue-500 block w-full p-2.5" required>
+                    <span onClick="removeParent(this)" id="participant{{ forloop.counter }}" class="cursor-default bg-gray-200 inline-flex items-center px-3 text-sm text-gray-900 rounded-r-lg border border-l-0 border-gray-300">
+                        X
+                    </span>
+                </div>
+                    
+            </div>
+            {% endfor %}
+        </div>
+
+        <a onClick="addParticipant()" class="cursor-default text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 my-3 text-center">Add participant</a>
+
+        <div class="grid grid-cols-2 gap-6 my-6">
+            <div>
+                <label for="email1" class="block text-base mb-2">Start Time</label>
+                <input type="datetime-local" name="start_time" id="startTime" value="{{ interview.start_time }}" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>    
+            </div>
+            
+            <div>
+                <label for="email1" class="block text-base mb-2">End Time</label>
+                <input type="datetime-local" name="end_time" id="endTime" value="{{ interview.end_time }}" class="bg-gray-50 border border-gray-300 text-slate-700 text-sm rounded-lg focus:border-blue-500 block w-full p-2.5" required>
+                <p id="error" class="text-red-500 text-sm font-medium"></p>
+            </div>
+        </div>
+        <input type="hidden" name="interview_id" value="{{ interview.id }}"/>
+        
+        <button type="submit" class="text-white bg-blue-700 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 my-3 text-center">Submit</button>
+    </form>
+</div>
+{% endblock %}
